@@ -246,6 +246,10 @@ public class PrintImageLocations extends PDFStreamEngine {
 	private void exportHTML(BufferedImage image, float width, float height,
 			float x, float y) {
 		try {
+			width = width / 1.38823529412f;
+			height = height / 1.38823529412f;
+//			x = * 1.38823529412f;
+//			y = * 1.38823529412f;
 			htmlService.addImage(htmlDocument, image, "", (int) width,
 					(int) height, (int) x, (int) y);
 		} catch (PDF2HTMLException e) {

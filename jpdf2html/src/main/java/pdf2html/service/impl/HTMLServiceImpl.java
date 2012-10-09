@@ -9,6 +9,7 @@ import java.util.Map;
 import javax.imageio.ImageIO;
 
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang.StringUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -28,17 +29,17 @@ public class HTMLServiceImpl implements HTMLService {
 			throws PDF2HTMLException {
 		Document document = Jsoup.parse(HTMLConstants.EMPTY_HTML);
 
-		Map<String, String> attributes = new HashMap<String, String>();
+		Map<String, Object> attributes = new HashMap<String, Object>();
 		attributes.put(HTMLConstants.ID, id);
 		attributes
 				.put("style",
 						"width: "
-								+ width
+								+ applyZoom(width)
 								+ "px; height: "
-								+ height
+								+ applyZoom(height)
 								+ "px;"
-								+ "border:2px solid; border-radius:5px; -moz-border-radius:5px; /* Firefox 3.6 and earlier */"
-								+ "box-shadow: 10px 10px 5px #888888;");
+								+ "border:2px solid; border-radius:0px; -moz-border-radius:0px; /* Firefox 3.6 and earlier */"
+								+ "box-shadow: 10px 10px 10px #888888;");
 		pageElement = addElement(document.body(), HTMLConstants.DIV, attributes);
 
 		return document;
@@ -63,11 +64,12 @@ public class HTMLServiceImpl implements HTMLService {
 			direction *= -1;
 		}
 
-		Map<String, String> attributes = new HashMap<String, String>();
+		Map<String, Object> attributes = new HashMap<String, Object>();
 		attributes.put(HTMLConstants.ID, id);
-		attributes.put("style", "position:absolute; left:" + x + "px; top:" + y
-				+ "px; width: " + width + "px; height: " + height + "px;"
-				+ "font-family: " + fontFamily + ";" + "font-size: " + fontSize
+		attributes.put("style", "position:absolute; left:" + applyZoom(x)
+				+ "px; top:" + applyZoom(y) + "px; width: " + applyZoom(width)
+				+ "px; height: " + applyZoom(height) + "px;" + "font-family: "
+				+ fontFamily + ";" + "font-size: " + applyZoom(fontSize)
 				+ "px;" + "font-style: " + fontStyle + ";" + "font-weight: "
 				+ fontWeight + ";"
 				+ "writing-mode:tb-rl;-webkit-transform:rotate(" + direction
@@ -77,6 +79,9 @@ public class HTMLServiceImpl implements HTMLService {
 				+ ")");
 		// + "background-color:rgb(" + backRed + "," + backGreen + "," +
 		// backBlue + ");"
+		if (StringUtils.isEmpty(text)) {
+			text = "";
+		}
 		Element element = addElement(pageElement, HTMLConstants.DIV, attributes);
 		element.text(text);
 		return element;
@@ -98,14 +103,14 @@ public class HTMLServiceImpl implements HTMLService {
 				+ Base64.encodeBase64String(imageBytes);
 		String alt = "Meta7_1_Image8_1";
 		// String style = "display: none";
-		String style = "position:absolute; left:" + x + "px; top:" + y + "px;";
+		String style = "position:absolute; left:" + applyZoom(x) + "px; top:"
+				+ applyZoom(y) + "px;width:" + applyZoom(width) + "px;height:"
+				+ applyZoom(height) + "px;";
 
-		Map<String, String> attributes = new HashMap<String, String>();
+		Map<String, Object> attributes = new HashMap<String, Object>();
 		attributes.put(HTMLConstants.ID, id);
 		attributes.put(HTMLConstants.SRC, src);
 		attributes.put(HTMLConstants.ALT, alt);
-		attributes.put(HTMLConstants.WIDTH, String.valueOf(width));
-		attributes.put(HTMLConstants.HEIGHT, String.valueOf(height));
 		attributes.put(HTMLConstants.STYLE, style);
 
 		Element element = addElement(pageElement, HTMLConstants.IMAGE,
@@ -114,16 +119,31 @@ public class HTMLServiceImpl implements HTMLService {
 	}
 
 	private Element addElement(Element parent, String name,
-			Map<String, String> attributes) throws PDF2HTMLException {
+			Map<String, Object> attributes) throws PDF2HTMLException {
 		Element element = parent.appendElement(name);
 
+		Object valueObj;
+		String value;
 		if (attributes != null) {
-			for (Map.Entry<String, String> entry : attributes.entrySet()) {
-				element.attr(entry.getKey(), entry.getValue());
+			for (Map.Entry<String, Object> entry : attributes.entrySet()) {
+				valueObj = entry.getValue();
+				if (valueObj == null) {
+					value = "";
+				} else if (valueObj instanceof Number) {
+					value = String.valueOf(applyZoom((Number) valueObj));
+				} else {
+					value = String.valueOf(valueObj);
+				}
+				element.attr(entry.getKey(), value);
 			}
 		}
 
 		return element;
+	}
+
+	private int applyZoom(Number value) {
+		return (int) (value.intValue() * 1.38823529412f);
+//		return (int) (value.intValue());
 	}
 
 }

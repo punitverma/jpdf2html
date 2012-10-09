@@ -26,8 +26,8 @@ public class Main {
 		PDF2HTMLService service = appContext.getBean(PDF2HTMLService.class);
 
 		try {
-			InputStream inputStream = new FileInputStream("test1.pdf");
-			String output = service.convertPage(inputStream, 5);
+			InputStream inputStream = new FileInputStream("test.pdf");
+			String output = service.convertPage(inputStream, 0);
 			FileUtils.writeStringToFile(new File("generated.html"), output);
 		} catch (PDF2HTMLException e) {
 			e.printStackTrace();

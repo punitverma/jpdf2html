@@ -16,9 +16,5 @@ public class HTMLConstants {
 	
 	public final static String SRC = "src";
 	
-	public final static String WIDTH = "width";
-	
-	public final static String HEIGHT = "height";
-	
 	public final static String STYLE = "style";
 }

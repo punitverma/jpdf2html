@@ -28,6 +28,7 @@ public class PDF2HTMLServiceImpl implements PDF2HTMLService {
 	@Override
 	public String convertPage(InputStream document, int page)
 			throws PDF2HTMLException {
+		long start = System.currentTimeMillis();
 		// Parse PDF
 		PDDocument pdf = pdfService.load(document, null);
 		PDPage pdPage = (PDPage) pdf.getDocumentCatalog().getAllPages()
@@ -65,6 +66,8 @@ public class PDF2HTMLServiceImpl implements PDF2HTMLService {
 			e.printStackTrace();
 		}
 
+		long end = System.currentTimeMillis();
+		System.out.print("Time elapsed: " + (end - start));
 		return html.toString();
 	}
 

@@ -45,6 +45,7 @@ import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.common.COSObjectable;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.apache.pdfbox.pdmodel.common.PDStream;
+import org.apache.pdfbox.pdmodel.font.PDFont;
 import org.apache.pdfbox.pdmodel.font.PDFontDescriptor;
 import org.apache.pdfbox.pdmodel.graphics.PDGraphicsState;
 import org.apache.pdfbox.pdmodel.interactive.documentnavigation.outline.PDOutlineItem;
@@ -52,6 +53,7 @@ import org.apache.pdfbox.pdmodel.interactive.pagenavigation.PDThreadBead;
 import org.jsoup.nodes.Document;
 
 import pdf2html.service.intf.HTMLService;
+import pdf2html.util.FontMap;
 
 /**
  * This class will take a pdf document and strip out all of the text and ignore
@@ -1934,20 +1936,42 @@ public class PDFTextStripper extends PDFStreamEngine {
 				String text = textPosition.getCharacter();
 
 				try {
-					int width = (int) textPosition.getWidth();
-					int height = (int) textPosition.getHeight();
-					float direction = textPosition.getDir();
-					PDFontDescriptor fontDescriptor = textPosition.getFont()
-							.getFontDescriptor();
-					String fontFamily = fontDescriptor.getFontFamily();
-					if (fontFamily == null) {
-						fontFamily = fontDescriptor.getFontName();
+					// Size & Position
+					int width = 0;
+					int height = 0;
+					float direction = 0;
+					int x = 0;
+					int y = 0;
+					if (textPosition.getTextPos() != null) {
+						width = (int) textPosition.getWidth();
+						height = (int) textPosition.getHeight();
+						direction = textPosition.getDir();
+						x = (int) textPosition.getX();
+						y = (int) textPosition.getY();
 					}
-					int fontWeight = (int) fontDescriptor.getFontWeight();
-					boolean italic = fontDescriptor.isItalic();
+
+					// Font
+					PDFont pdFont = textPosition.getFont();
+					String fontFamily = null;
+					int fontWeight = 0;
+					boolean italic = false;
+					if (pdFont != null) {
+						PDFontDescriptor fontDescriptor = pdFont
+								.getFontDescriptor();
+						fontFamily = fontDescriptor.getFontFamily();
+						if (fontFamily == null) {
+							fontFamily = fontDescriptor.getFontName();
+						}
+						fontFamily = FontMap.getFont(fontFamily);
+						fontWeight = (int) fontDescriptor.getFontWeight();
+						italic = fontDescriptor.isItalic();
+					}
+					System.out.println("Font: " + fontFamily + ", fontWeight: "
+							+ fontWeight + ", italic: " + italic);
+
+					// Font size
 					int fontSize = (int) textPosition.getFontSizeInPt();
-					int x = (int) textPosition.getX();
-					int y = (int) textPosition.getY();
+
 					htmlService.addText(htmlDocument, text, "", width, height,
 							direction, fontSize, x, y, fontFamily, fontWeight,
 							italic, foreColor.getRed(), foreColor.getGreen(),
