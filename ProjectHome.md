@@ -1,0 +1,1 @@
+This project aims to create a pure java solution for generating HTML documents from PDF pages.
